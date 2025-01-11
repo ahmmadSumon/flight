@@ -18,6 +18,8 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
+import { FloatingDock } from "./ui/floating-dock";
+import { FloatingDockDemo } from "./FloatingDockDemo";
 
 
 const Navbar = () => {
@@ -52,24 +54,25 @@ const Navbar = () => {
       
       <div className="relative  gap-0">
         <Link href="/">
-         <h1 className="text-2xl">Flight</h1>
+         <h1 className="text-2xl px-2">Flight_Booking.com</h1>
         </Link>
+      </div>
+      <div className="relative  gap-0">
+          <FloatingDockDemo/>
       </div>
 
    
       <div className="hidden lg:flex justify-center items-center">
-        <Link href="/readpost">
-    
-        </Link>
+       
       
         <div className="flex gap-[12px]">
-        <Link href="/">
+        <Link href="/login">
   <div className="px-[44.75px] py-[8px] text-sm text-black rounded-xl border-[1px] border-[#767676] bg-[#E3E3E3] transition-transform duration-300 ease-in-out transform hover:scale-105 hover:bg-[#d1d1d1] hover:border-[#767676]">
     Sign In
   </div>
 </Link>
 
-<Link href="/">
+<Link href="/register">
   <div className="px-[44.75px] py-[8px] text-sm text-white rounded-xl bg-[#2C2C2C] transition-transform duration-300 ease-in-out transform hover:scale-105 hover:bg-[#444444]">
     Register
   </div>

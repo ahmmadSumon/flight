@@ -1,40 +1,134 @@
-import { useEffect } from "react";
-import { getFlights } from "@/services/flightService";
-import { useFlightStore } from "@/stores/useFlightStore";
+"use client";
 
-const FlightTable = () => {
-  const { flights, setFlights } = useFlightStore();
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+
+interface Flight {
+  _id: string;
+  flightNumber: string;
+  airline: string;
+  origin: string;
+  destination: string;
+  price: number;
+}
+
+const FlightTable: React.FC = () => {
+  const [flights, setFlights] = useState<Flight[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchFlights = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const queryParams = new URLSearchParams();
+      if (searchTerm) queryParams.append("searchTerm", searchTerm);
+      if (origin) queryParams.append("origin", origin);
+      if (destination) queryParams.append("destination", destination);
+
+      const response = await fetch(
+        `https://flight-back.vercel.app/api/v1/flight?${queryParams.toString()}`
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        setFlights(data.data.data); // Nested flight array
+      } else {
+        setError(data.message || "Failed to fetch flights");
+      }
+    } catch (err) {
+      setError("Error fetching flight data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchFlights = async () => {
-      const response = await getFlights("");
-      setFlights(response.data);
-    };
-
     fetchFlights();
-  }, [setFlights]);
+  }, []);
 
   return (
-    <table className="table-auto w-full">
-      <thead>
-        <tr>
-          <th>Flight Number</th>
-          <th>Airline</th>
-          <th>Origin</th>
-          <th>Destination</th>
-        </tr>
-      </thead>
-      <tbody>
-        {flights.map((flight) => (
-          <tr key={flight.id}>
-            <td>{flight.flightNumber}</td>
-            <td>{flight.airline}</td>
-            <td>{flight.origin}</td>
-            <td>{flight.destination}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">Flight Table</h1>
+
+      {/* Search and Filter Inputs */}
+      <div className="mb-6 flex gap-4 flex-wrap justify-center items-center">
+        <input
+          type="text"
+          placeholder="Search by flight number or airline"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="border p-2 rounded-md w-full md:w-1/4"
+        />
+        <span>or</span>
+        <input
+          type="text"
+          placeholder="Filter by origin"
+          value={origin}
+          onChange={(e) => setOrigin(e.target.value)}
+          className="border p-2 rounded-md w-full md:w-1/3"
+        />
+          <span>or</span>
+        <input
+          type="text"
+          placeholder="Filter by destination"
+          value={destination}
+          onChange={(e) => setDestination(e.target.value)}
+          className="border p-2 rounded-md w-full md:w-1/3"
+        />
+        <button
+          onClick={fetchFlights}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md"
+        >
+          Search
+        </button>
+      </div>
+
+      {/* Loading and Error States */}
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Flights Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full table-auto border-collapse border border-gray-300">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 border-b text-left">Flight Number</th>
+              <th className="px-4 py-2 border-b text-left">Airline</th>
+              <th className="px-4 py-2 border-b text-left">Origin</th>
+              <th className="px-4 py-2 border-b text-left">Destination</th>
+              <th className="px-4 py-2 border-b text-left">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {flights.length > 0 ? (
+              flights.map((flight) => (
+                <tr key={flight._id} className="border-b">
+                  <td className="px-4 py-2">
+                    <Link href={`/flight-details/${flight._id}`}>
+                      {flight.flightNumber}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2">{flight.airline}</td>
+                  <td className="px-4 py-2">{flight.origin}</td>
+                  <td className="px-4 py-2">{flight.destination}</td>
+                  <td className="px-4 py-2">{flight.price}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="px-4 py-2 text-center">
+                  No flights available
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 

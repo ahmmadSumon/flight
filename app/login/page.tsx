@@ -1,28 +1,13 @@
-import { useForm } from "react-hook-form";
-import { loginUser } from "@/services/authService";
-import { useAuthStore } from "@/stores/useAuthStore";
+// app/register/page.tsx
 
-const Login = () => {
-  const { register, handleSubmit } = useForm<{ email: string; password: string }>();
-  const setToken = useAuthStore((state) => state.setToken);
+import React from "react";
 
-  const onSubmit = async (data: { email: string; password: string }) => {
-    try {
-      const response = await loginUser(data);
-      setToken(response.data.token);
-      alert("Login Successful!");
-    } catch (error) {
-      alert("Invalid Credentials!");
-    }
-  };
+import { LoginForm } from "@/components/LoginForm";
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-sm mx-auto">
-      <input {...register("email")} placeholder="Email" className="input" />
-      <input {...register("password")} placeholder="Password" type="password" className="input" />
-      <button type="submit" className="btn">Login</button>
-    </form>
-  );
-};
-
-export default Login;
+export default function LoginPage() {
+    return (
+        <div className="flex justify-center mt-20 items-center h-screen bg-gray-100">
+            <LoginForm/>
+        </div>
+    );
+}
