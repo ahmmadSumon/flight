@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const FlightDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const [flightId, setFlightId] = useState<string | null>(null);
   const [flight, setFlight] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter(); // Import useRouter for navigation
 
   useEffect(() => {
-    // Unwrap the params Promise
     const getParams = async () => {
       const unwrappedParams = await params;
       setFlightId(unwrappedParams.id);
@@ -67,6 +68,12 @@ const FlightDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => {
             <span className="font-semibold">Price:</span> ${flight.price}
           </p>
         </div>
+        <button
+          className="bg-blue-500 text-white px-4 py-2 mt-4 w-full rounded-md"
+          onClick={() => router.push(`/book/${flightId}`)}
+        >
+          Book Now
+        </button>
       </div>
     </div>
   );

@@ -46,6 +46,34 @@ const FlightTable: React.FC = () => {
     }
   };
 
+  const handleDelete = async (flightId: string) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this flight?');
+    if (confirmDelete) {
+      try {
+        const response = await fetch(
+          `https://flight-back.vercel.app/api/v1/flight/delete/${flightId}`,
+          {
+            method: 'DELETE',
+          }
+        );
+  
+        const data = await response.json();
+        console.log('Delete Response:', data); // Log the response for debugging
+  
+        if (data.success) {
+          alert('Flight deleted successfully');
+          fetchFlights(); // Re-fetch to show updated list after deletion
+        } else {
+          alert(`Failed to delete flight: ${data.message}`);
+        }
+      } catch (err) {
+        console.error('Error deleting flight:', err);
+        alert('Error deleting flight');
+      }
+    }
+  };
+  
+
   useEffect(() => {
     fetchFlights();
   }, []);
@@ -71,7 +99,7 @@ const FlightTable: React.FC = () => {
           onChange={(e) => setOrigin(e.target.value)}
           className="border p-2 rounded-md w-full md:w-1/3"
         />
-          <span>or</span>
+        <span>or</span>
         <input
           type="text"
           placeholder="Filter by destination"
@@ -101,6 +129,7 @@ const FlightTable: React.FC = () => {
               <th className="px-4 py-2 border-b text-left">Origin</th>
               <th className="px-4 py-2 border-b text-left">Destination</th>
               <th className="px-4 py-2 border-b text-left">Price</th>
+              <th className="px-4 py-2 border-b text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -116,12 +145,20 @@ const FlightTable: React.FC = () => {
                   <td className="px-4 py-2">{flight.origin}</td>
                   <td className="px-4 py-2">{flight.destination}</td>
                   <td className="px-4 py-2">{flight.price}</td>
+                  <td className="px-4 py-2">
+                    <button
+                      onClick={() => handleDelete(flight._id)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-md"
+                    >
+                      Remove
+                    </button>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="px-4 py-2 text-center">
-                  No flights available
+                <td colSpan={6} className="text-center py-4">
+                  No flights available.
                 </td>
               </tr>
             )}

@@ -1,17 +1,11 @@
-"use client";
-import React from "react";
+"use client"
+import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useRouter } from 'next/navigation';
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
-import { cn } from "@/lib/utils";
-import {
-  IconBrandGithub,
-  IconBrandGoogle,
-  IconBrandOnlyfans,
-} from "@tabler/icons-react";
-
 
 // Validation schema for Login
 const loginSchema = yup.object().shape({
@@ -19,79 +13,74 @@ const loginSchema = yup.object().shape({
   password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
 });
 
-// Form input types
-
 type LoginFormInputs = yup.InferType<typeof loginSchema>;
 
-
 export function LoginForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormInputs>({
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>({
     resolver: yupResolver(loginSchema),
   });
 
-  const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
-    console.log("Login data:", data);
+  const router = useRouter();
+
+  const adminEmail = "admin@example.com"; // Admin email
+  const adminPassword = "admin123"; // Admin password
+
+  const onSubmitLogin: SubmitHandler<LoginFormInputs> = async (data) => {
+    try {
+      const response = await fetch('https://flight-back.vercel.app/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setAlertMessage('Login successful!');
+
+        // Check if the logged-in user is an admin
+        if (data.email === adminEmail && data.password === adminPassword) {
+          // Redirect to the dashboard if admin
+          router.push("/dashboard");
+        } else {
+          // Redirect to the homepage if not admin
+          router.push("/");
+        }
+      } else {
+        setAlertMessage('Login failed: ' + result.message);
+      }
+    } catch (error :any) {
+      setAlertMessage('Error during login: ' + error.message);
+    }
   };
 
   return (
-    <FormContainer title="Welcome Back" subtitle="Login to your account">
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <LabelInputContainer className="mb-4" error={errors.email?.message}>
+    <div className="max-w-md w-full mt-28 mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
+      <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">Login to Your Account</h2>
+      <form onSubmit={handleSubmit(onSubmitLogin)} className="mt-8">
+        <div className="mb-4">
           <Label htmlFor="email">Email Address</Label>
-          <Input id="email" {...register("email")} placeholder="projectmayhem@fc.com" type="email" />
-        </LabelInputContainer>
-        <LabelInputContainer className="mb-8" error={errors.password?.message}>
+          <Input id="email" placeholder="Enter your email" {...register("email")} />
+          {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+        </div>
+        <div className="mb-4">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" {...register("password")} placeholder="••••••••" type="password" />
-        </LabelInputContainer>
+          <Input id="password" type="password" placeholder="Enter your password" {...register("password")} />
+          {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+        </div>
 
-        <SubmitButton text="Login &rarr;" />
+        <button
+          type="submit"
+          className="bg-blue-500 text-white w-full h-10 rounded-md"
+        >
+          Login
+        </button>
+
+        {alertMessage && <div className="mt-4 p-4 bg-green-100 text-green-800 rounded-md">{alertMessage}</div>}
       </form>
-    </FormContainer>
+    </div>
   );
 }
-
-// Reusable components
-const SubmitButton = ({ text }: { text: string }) => (
-  <button
-    className="bg-gradient-to-br from-black to-neutral-600 block w-full text-white rounded-md h-10 font-medium shadow-input"
-    type="submit"
-  >
-    {text}
-  </button>
-);
-
-const FormContainer = ({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  children: React.ReactNode;
-}) => (
-  <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
-    <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">{title}</h2>
-    <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300">{subtitle}</p>
-    {children}
-  </div>
-);
-
-const LabelInputContainer = ({
-  children,
-  error,
-  className,
-}: {
-  children: React.ReactNode;
-  error?: string;
-  className?: string;
-}) => (
-  <div className={cn("flex flex-col space-y-2 w-full", className)}>
-    {children}
-    {error && <span className="text-red-500 text-sm">{error}</span>}
-  </div>
-);

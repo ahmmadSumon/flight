@@ -8,16 +8,16 @@ export const Hero: React.FC = () => {
     <section className="relative bg-gradient-to-br from-blue-600 to-indigo-800 text-white mt-32">
       <div className="container mx-auto px-6 py-16 text-center">
         <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-          Your Gateway to Seamless Flight Management
+          You are just One Step Behind with Flight Booking
         </h1>
         <p className="mt-4 text-lg md:text-xl">
           Discover, manage, and book flights effortlessly with our advanced system.
         </p>
         <div className="mt-8 flex justify-center space-x-4 relative z-50">
           {/* Button 1 */}
-          <Link href="/create-flight">
+          <Link href="/all-flights">
             <div className="px-6 py-3 text-lg font-medium bg-white text-blue-600 rounded-lg shadow-lg hover:bg-gray-100 transition cursor-pointer">
-              Get Started
+              Book Now
             </div>
           </Link>
           {/* Button 2 */}
